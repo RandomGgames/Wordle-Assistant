@@ -59,7 +59,7 @@ def load_words(file_path):
 def generate_words(greens, yellows, grays, english_words):
     logger.debug("Generating possible words...")
     green_chars = list(greens.values())
-    yellow_chars = list(yellows.values())
+    yellow_chars = list(set(char for chars in yellows.values() for char in chars))
     gray_chars = grays
     available_chars = green_chars + yellow_chars + gray_chars
 
@@ -74,10 +74,12 @@ def generate_words(greens, yellows, grays, english_words):
         for index, char in greens.items():
             chars_by_index[str(index)] = [char]
     if len(yellows) > 0:
-        for index, char in yellows.items():
-            chars_by_index[str(index)].remove(char)
+        for index, chars in yellows.items():
+            for char in chars:
+                if char in chars_by_index[str(index)]:
+                    chars_by_index[str(index)].remove(char)
+                    logger.debug(f"Removed {char} from spot {index}")
 
-    generated_words_count = 0
     generated_words = []
     for i in chars_by_index["1"]:
         for j in chars_by_index["2"]:
@@ -91,8 +93,7 @@ def generate_words(greens, yellows, grays, english_words):
                             continue
                         if generated_word not in generated_words:
                             generated_words.append(generated_word)
-                            generated_words_count += 1
-    logger.debug(f"Generated {generated_words_count} possible words.")
+    logger.debug(f"Generated {len(generated_words)} possible words.")
     return generated_words
 
 
@@ -123,7 +124,7 @@ def main() -> None:
     for part in yellow.split():
         letter = part[0]
         number = part[1:]
-        yellows[number] = letter
+        yellows.setdefault(number, []).append(letter)
     logger.debug(f"Yellows: {yellows}")
 
     # Process grays
