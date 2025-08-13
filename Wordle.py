@@ -57,7 +57,6 @@ def load_words(file_path):
 
 
 def generate_words(greens, yellows, grays, english_words):
-    logger.debug("Generating possible words...")
     green_chars = list(greens.values())
     yellow_chars = list(set(char for chars in yellows.values() for char in chars))
     gray_chars = grays
@@ -80,6 +79,8 @@ def generate_words(greens, yellows, grays, english_words):
                     chars_by_index[str(index)].remove(char)
                     logger.debug(f"Removed {char} from spot {index}")
 
+    n_letter_combinations = len(chars_by_index["1"]) * len(chars_by_index["2"]) * len(chars_by_index["3"]) * len(chars_by_index["4"]) * len(chars_by_index["5"])
+    logger.debug(f"Generating {n_letter_combinations} possible letter combinations...")
     generated_words = []
     for i in chars_by_index["1"]:
         for j in chars_by_index["2"]:
@@ -101,6 +102,10 @@ def main() -> None:
     green = input("\n🟩 Which letters are correct? Use '_' for unknowns. E.g. '__a__'\n>>> ").strip().lower()
     yellow = input("\n🟨 Which letters are used but in the wrong positions? Format being 'a1 b3' meaning 'a not in pos 1, b not in pos 3'\n>>> ").strip().lower()
     gray = input("⬜ Which letters are still availble? Just list them. E.g. 'xqz'\n>>> ").strip().lower()
+
+    logger.debug(f'Green: {green}')
+    logger.debug(f'Yellow: {yellow}')
+    logger.debug(f'Gray: {gray}')
 
     start_time = time.perf_counter()
     logger.info("Starting operation...")
