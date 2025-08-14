@@ -199,7 +199,7 @@ if __name__ == "__main__":
     log_dir = pathlib.Path(f"{script_name} Logs")
     log_file_name = f"{timestamp}_{pc_name}.log"
     log_file_path = log_dir / log_file_name
-    setup_logging(logger, log_file_path, number_of_logs_to_keep=10, log_message_format="%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s")
+    setup_logging(logger, log_file_path, number_of_logs_to_keep=100, log_message_format="%(asctime)s.%(msecs)03d %(levelname)s [%(funcName)s]: %(message)s")
 
     error = 0
     try:
