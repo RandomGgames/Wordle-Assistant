@@ -52,8 +52,14 @@ def download_if_updated():
 
 def load_words(file_path):
     logger.debug(f"Loading words list...")
+    words = []
     with open(file_path, "r") as f:
-        return [word.strip().lower() for word in f if len(word.strip()) == 5 and word.strip().isalpha()]
+        for word in f:
+            word = word.strip().lower()
+            if len(word) == 5 and word.isalpha():
+                words.append(word)
+    logger.debug(f"{len(words)} 5-letter words loaded.")
+    return words
 
 
 def generate_words(greens, yellows, grays, english_words):
