@@ -108,10 +108,6 @@ def main() -> None:
     yellow = input("\n🟨 Which letters are used but in the wrong positions? Format being 'a1 b3' meaning 'a not in pos 1, b not in pos 3'\n>>> ").strip().lower()
     gray = input("⬜ Which letters are still availble? Just list them. E.g. 'xqz'\n>>> ").strip().lower()
 
-    logger.debug(f'Green: {green}')
-    logger.debug(f'Yellow: {yellow}')
-    logger.debug(f'Gray: {gray}')
-
     start_time = time.perf_counter()
     logger.info("Starting operation...")
 
@@ -122,11 +118,12 @@ def main() -> None:
 
     english_words = load_words(WORD_LIST_FILE)
 
-    # Process grays
+    # Process greens
     greens = {}
     for i, char in enumerate(green, start=1):
         if char != '_':
             greens[str(i)] = char
+    logger.debug(f'Green: {green}')
     logger.debug(f"Greens: {greens}")
 
     # Process yellows
@@ -135,10 +132,12 @@ def main() -> None:
         letter = part[0]
         number = part[1:]
         yellows.setdefault(number, []).append(letter)
+    logger.debug(f'Yellow: {yellow}')
     logger.debug(f"Yellows: {yellows}")
 
     # Process grays
     grays = list(gray)
+    logger.debug(f'Gray: {gray}')
     logger.debug(f"Grays: {grays}")
 
     generated_words = generate_words(greens, yellows, grays, english_words)
