@@ -83,7 +83,6 @@ def generate_words(greens, yellows, grays, english_words):
             for char in chars:
                 if char in chars_by_index[str(index)]:
                     chars_by_index[str(index)].remove(char)
-                    logger.debug(f"Removed {char} from spot {index}")
 
     n_letter_combinations = len(chars_by_index["1"]) * len(chars_by_index["2"]) * len(chars_by_index["3"]) * len(chars_by_index["4"]) * len(chars_by_index["5"])
     logger.debug(f"Generating {n_letter_combinations} possible letter combinations...")
