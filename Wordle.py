@@ -1,3 +1,4 @@
+import itertools
 import logging
 import os
 import pathlib
@@ -9,6 +10,7 @@ import typing
 import urllib.request
 
 from datetime import datetime
+from tqdm import tqdm
 from urllib.error import HTTPError
 
 logger = logging.getLogger(__name__)
@@ -81,24 +83,21 @@ def generate_words(greens, yellows, grays, english_words):
     if len(yellows) > 0:
         for index, chars in yellows.items():
             for char in chars:
-                if char in chars_by_index[str(index)]:
+                while char in chars_by_index[str(index)]:
                     chars_by_index[str(index)].remove(char)
 
-    n_letter_combinations = len(chars_by_index["1"]) * len(chars_by_index["2"]) * len(chars_by_index["3"]) * len(chars_by_index["4"]) * len(chars_by_index["5"])
+    n_letter_combinations = (len(chars_by_index["1"]) * len(chars_by_index["2"]) * len(chars_by_index["3"]) * len(chars_by_index["4"]) * len(chars_by_index["5"]))
     logger.debug(f"Generating {n_letter_combinations} possible letter combinations...")
     generated_words = []
-    for i in chars_by_index["1"]:
-        for j in chars_by_index["2"]:
-            for k in chars_by_index["3"]:
-                for l in chars_by_index["4"]:
-                    for m in chars_by_index["5"]:
-                        generated_word = f"{i}{j}{k}{l}{m}"
-                        if not all(char in generated_word for char in yellow_chars):
-                            continue
-                        if generated_word not in english_words:
-                            continue
-                        if generated_word not in generated_words:
-                            generated_words.append(generated_word)
+    for combo in tqdm(itertools.product(chars_by_index["1"], chars_by_index["2"], chars_by_index["3"], chars_by_index["4"], chars_by_index["5"]), total=n_letter_combinations, desc="Generating words", unit="word"):
+        generated_word = "".join(combo)
+        if not all(char in generated_word for char in yellow_chars):
+            continue
+        if generated_word not in english_words:
+            continue
+        if generated_word not in generated_words:
+            generated_words.append(generated_word)
+
     logger.debug(f"Generated {len(generated_words)} possible words.")
     return generated_words
 
@@ -208,4 +207,5 @@ if __name__ == "__main__":
         logger.warning(f"A fatal error has occurred: {repr(e)}\n{traceback.format_exc()}")
         error = 1
     finally:
+        input("\nPress enter to exit...")
         sys.exit(error)
