@@ -52,44 +52,43 @@ def download_if_updated():
         logger.debug(f"Unknown error occurred: {e}")
 
 
-def load_words(file_path):
+def load_words(file_path, word_length):
     logger.debug(f"Loading words list...")
     words = []
     with open(file_path, "r") as f:
         for word in f:
             word = word.strip().lower()
-            if len(word) == 5 and word.isalpha():
+            if len(word) == word_length and word.isalpha():
                 words.append(word)
-    logger.debug(f"{len(words)} 5-letter words loaded.")
+    logger.debug(f"{len(words)} {word_length}-letter words loaded.")
     return words
 
 
-def generate_words(greens, yellows, grays, english_words):
+def generate_words(greens, yellows, grays, english_words, word_length):
     green_chars = list(set(greens.values()))
     yellow_chars = list(set(char for chars in yellows.values() for char in chars))
     gray_chars = list(set(grays))
     available_chars = list(set(green_chars + yellow_chars + gray_chars))
 
-    chars_by_index = {
-        "1": available_chars[:],
-        "2": available_chars[:],
-        "3": available_chars[:],
-        "4": available_chars[:],
-        "5": available_chars[:],
-    }
-    if len(greens) > 0:
-        for index, char in greens.items():
-            chars_by_index[str(index)] = [char]
-    if len(yellows) > 0:
-        for index, chars in yellows.items():
-            for char in chars:
-                while char in chars_by_index[str(index)]:
-                    chars_by_index[str(index)].remove(char)
+    chars_by_index = {str(i): available_chars[:] for i in range(1, word_length + 1)}
 
-    n_letter_combinations = (len(chars_by_index["1"]) * len(chars_by_index["2"]) * len(chars_by_index["3"]) * len(chars_by_index["4"]) * len(chars_by_index["5"]))
+    for index, char in greens.items():
+        chars_by_index[str(index)] = [char]
+
+    for index, chars in yellows.items():
+        for char in chars:
+            while char in chars_by_index[str(index)]:
+                chars_by_index[str(index)].remove(char)
+
+    lengths = [len(chars_by_index[str(i)]) for i in range(1, word_length + 1)]
+    n_letter_combinations = 1
+    for length in lengths:
+        n_letter_combinations *= length
+
     logger.debug(f"Generating {n_letter_combinations} possible letter combinations...")
     generated_words = []
-    for combo in tqdm(itertools.product(chars_by_index["1"], chars_by_index["2"], chars_by_index["3"], chars_by_index["4"], chars_by_index["5"]), total=n_letter_combinations, desc="Generating words", unit="word"):
+    for combo in tqdm(itertools.product(*(chars_by_index[str(i)] for i in range(1, word_length + 1))),
+                      total=n_letter_combinations, desc="Generating words", unit="word"):
         generated_word = "".join(combo)
         if not all(char in generated_word for char in yellow_chars):
             continue
@@ -103,6 +102,9 @@ def generate_words(greens, yellows, grays, english_words):
 
 
 def main() -> None:
+    word_length = int(input("\nEnter word length (e.g., 5 for Wordle):\n>>> ").strip())
+    if word_length < 1:
+        raise ValueError("Word length must be at least 1.")
     green = input("\n🟩 Which letters are correct? Use '_' for unknowns. E.g. '__a__'\n>>> ").strip().lower()
     yellow = input("\n🟨 Which letters are used but in the wrong positions? Format being 'a1 b3' meaning 'a not in pos 1, b not in pos 3'\n>>> ").strip().lower()
     gray = input("⬜ Which letters are still availble? Just list them. E.g. 'xqz'\n>>> ").strip().lower()
@@ -115,7 +117,7 @@ def main() -> None:
         logger.debug("❌ 'words.txt' not found. Aborting.")
         return
 
-    english_words = load_words(WORD_LIST_FILE)
+    english_words = load_words(WORD_LIST_FILE, word_length)
 
     # Process greens
     greens = {}
@@ -139,7 +141,7 @@ def main() -> None:
     logger.debug(f'Gray: {gray}')
     logger.debug(f"Grays: {grays}")
 
-    generated_words = generate_words(greens, yellows, grays, english_words)
+    generated_words = generate_words(greens, yellows, grays, english_words, word_length)
 
     if len(generated_words) > 0:
         logger.info(f"Generated the following possible words:")
