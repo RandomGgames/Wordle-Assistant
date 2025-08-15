@@ -63,10 +63,10 @@ def load_words(file_path):
 
 
 def generate_words(greens, yellows, grays, english_words):
-    green_chars = list(greens.values())
+    green_chars = list(set(greens.values()))
     yellow_chars = list(set(char for chars in yellows.values() for char in chars))
-    gray_chars = grays
-    available_chars = green_chars + yellow_chars + gray_chars
+    gray_chars = list(set(grays))
+    available_chars = list(set(green_chars + yellow_chars + gray_chars))
 
     chars_by_index = {
         "1": available_chars[:],
